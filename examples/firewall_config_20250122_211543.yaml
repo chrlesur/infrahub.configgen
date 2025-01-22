@@ -1,0 +1,92 @@
+version: v1
+nodes:
+- namespace: Network
+  name: Firewall
+  description: Firewall configuration
+  icon: mdi-firewall
+  attributes:
+  - name: hostname
+    kind: String
+    min_length: 3
+    max_length: 64
+    description: Firewall hostname
+    unique: true
+  - name: model
+    kind: String 
+    description: Firewall model
+    enum:
+      - FortiGate-60F
+      - FortiGate-100F
+      - FortiGate-200F
+      - FortiGate-600F
+  - name: firmware_version
+    kind: String
+    description: OS firmware version
+    pattern: '^[0-9]+\.[0-9]+\.[0-9]+$'
+  - name: ha_mode
+    kind: String
+    description: High availability mode
+    enum:
+      - standalone
+      - active-passive
+      - active-active
+    optional: true
+  - name: administrative_status
+    kind: String
+    description: Administrative status
+    enum:
+      - enabled
+      - disabled
+  relationships:
+  - name: interfaces
+    kind: Component 
+    peer: NetworkInterface
+    description: Network interfaces
+    min_count: 1
+  - name: zones
+    kind: Component
+    peer: SecurityZone
+    description: Security zones
+- namespace: Network
+  name: NetworkInterface
+  description: Network interface configuration
+  attributes:
+  - name: name
+    kind: String
+    description: Interface name
+    min_length: 2
+    max_length: 15
+  - name: vlan_id
+    kind: Integer
+    description: VLAN ID
+    optional: true
+  - name: ip_address
+    kind: String
+    description: IP address
+    pattern: '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/[0-9]{1,2}$'
+  - name: administrative_status
+    kind: String
+    description: Administrative status  
+    enum:
+      - enabled 
+      - disabled
+- namespace: Network  
+  name: SecurityZone
+  description: Security zone configuration
+  attributes:
+  - name: name
+    kind: String
+    description: Zone name
+    min_length: 2
+    max_length: 32
+  - name: intra_zone_traffic
+    kind: String
+    description: Allow intra-zone traffic
+    enum:
+      - allow
+      - deny
+  relationships:
+  - name: interfaces
+    peer: NetworkInterface
+    description: Interfaces in zone
+    min_count: 1

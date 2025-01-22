@@ -1,0 +1,152 @@
+version: '1.0'
+nodes:
+  - name: Router
+    namespace: Network
+    description: Network Router configuration for Fortigate Firewall
+    label: Fortigate Router
+    icon: mdi-router
+    include_in_menu: true
+    menu_placement: "Network/Infrastructure"
+    attributes:
+      - name: hostname
+        kind: string
+        description: Router hostname
+        min_length: 3
+        max_length: 64
+      - name: model
+        kind: string
+        optional: true
+        description: Router model number
+      - name: firmware_version
+        kind: string
+        description: Firmware version running on router
+      - name: management_ip
+        kind: string
+        description: Management IP address
+        regex: '^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$'
+      - name: routing_protocol
+        kind: dropdown
+        description: Routing protocol used
+        choices:
+          - name: static
+            label: Static
+          - name: ospf
+            label: OSPF
+          - name: bgp 
+            label: BGP
+      - name: status
+        kind: dropdown
+        description: Operational status
+        choices:
+          - name: active
+            label: Active
+            color: green
+          - name: inactive
+            label: Inactive
+            color: red
+          - name: maintenance
+            label: Maintenance
+            color: orange
+    relationships:
+      - name: interfaces
+        peer: NetworkInterface
+        kind: Component
+        description: Network interfaces on the router
+        cardinality: many
+        min_count: 1
+      - name: zones
+        peer: SecurityZone  
+        kind: Component
+        description: Security zones configured on router
+        cardinality: many
+      - name: policies
+        peer: SecurityPolicy
+        kind: Component
+        description: Security policies applied on router
+        cardinality: many
+  - name: NetworkInterface
+    namespace: Network
+    description: Router Network Interface
+    attributes:
+      - name: name
+        kind: string
+        description: Interface name/label
+        min_length: 2
+        max_length: 32
+      - name: type
+        kind: dropdown
+        description: Interface type
+        choices:
+          - name: physical
+            label: Physical
+          - name: vlan
+            label: VLAN
+          - name: loopback
+            label: Loopback
+      - name: ip_address
+        kind: string
+        description: IP address of interface
+        regex: '^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$'
+        optional: true
+      - name: subnet_mask
+        kind: string
+        description: Subnet mask
+        regex: '^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$'
+        optional: true
+      - name: enabled
+        kind: boolean
+        description: Interface enabled status
+        default_value: true
+  - name: SecurityZone
+    namespace: Network
+    description: Security Zone Configuration
+    attributes:
+      - name: name
+        kind: string
+        description: Zone name
+        min_length: 2
+        max_length: 32
+      - name: description
+        kind: string
+        description: Zone description
+        optional: true
+        max_length: 128
+      - name: security_level
+        kind: dropdown
+        description: Security level
+        choices:
+          - name: trusted
+            label: Trusted
+          - name: untrusted
+            label: Untrusted
+          - name: dmz
+            label: DMZ
+  - name: SecurityPolicy
+    namespace: Network
+    description: Security Policy Rules
+    attributes:
+      - name: name
+        kind: string
+        description: Policy name
+        min_length: 2
+        max_length: 32
+      - name: action
+        kind: dropdown
+        description: Policy action
+        choices:
+          - name: accept
+            label: Accept
+          - name: deny
+            label: Deny
+          - name: inspect
+            label: Inspect
+      - name: source_zone
+        kind: string
+        description: Source security zone
+      - name: destination_zone
+        kind: string
+        description: Destination security zone
+      - name: enabled
+        kind: boolean
+        description: Policy enabled status
+        default_value: true

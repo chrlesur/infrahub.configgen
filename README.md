@@ -23,6 +23,91 @@ cd configgen
 go build -o configgen
 ```
 
+## Quick Start
+
+The tool uses the official InfraHub schema, available at:
+```
+https://schema.infrahub.app/infrahub/schema/latest.json
+```
+
+Example usage with Claude assistant (ID: asst_dRvlfW2L6NkVyjeyvbU9tKBA):
+
+```bash
+configgen generate \
+  --assistant "asst_dRvlfW2L6NkVyjeyvbU9tKBA" \
+  --email "YOUREMAIL" \
+  --password "YOURPASSWORD" \
+  --type "router" \
+  --context "Configuration d'un routeur Cisco 2600 pour un réseau d'entreprise avec 3 VLANs." \
+  --schema docs/schema.json \
+  --debug
+```
+
+This will generate a YAML configuration like:
+
+```yaml
+version: "1.0.0"
+nodes:
+- name: CiscoRouter2600
+  namespace: Network
+  description: "Configuration d'un routeur Cisco 2600 avec 3 VLANs"
+  label: "Cisco 2600 Router"
+  attributes:
+  - name: hostname
+    kind: string
+    label: "Hostname"
+    description: "Nom du routeur"
+    min_length: 3
+    max_length: 64
+  - name: model
+    kind: string
+    label: "Model"
+    default_value: "2600"
+  - name: ios_version
+    kind: string
+    label: "IOS Version"
+    description: "Version du système IOS"
+  - name: mgmt_ip
+    kind: string
+    label: "Management IP"
+    description: "Adresse IP de gestion"
+  - name: vlan_config
+    kind: list
+    label: "VLAN Configuration"
+    description: "Configuration des VLANs"
+  - name: interfaces
+    kind: list
+    label: "Network Interfaces"
+  - name: routing_protocol
+    kind: dropdown
+    label: "Routing Protocol"
+    choices:
+    - name: ospf
+      label: "OSPF"
+    - name: eigrp
+      label: "EIGRP"
+    - name: rip
+      label: "RIP"
+  - name: access_lists
+    kind: list
+    label: "Access Lists"
+  - name: snmp_config
+    kind: boolean
+    label: "SNMP Enabled"
+    default_value: true
+  relationships:
+  - name: connected_switches
+    peer: NetworkSwitch
+    label: "Connected Switches"
+    cardinality: many
+    description: "Switches connected to this router"
+  - name: upstream_router
+    peer: CiscoRouter2600
+    label: "Upstream Router"
+    cardinality: one
+    optional: true
+```
+
 ## Usage
 
 ### Basic Usage
@@ -31,7 +116,7 @@ go build -o configgen
 ./configgen generate \
   --email "your.email@example.com" \
   --password "your_password" \
-  --assistant "assistant_id" \
+  --assistant "asst_dRvlfW2L6NkVyjeyvbU9tKBA" \
   --schema "/path/to/schema.json" \
   --type "router" \
   --context "Configure a Cisco router with 3 VLANs for enterprise network"
@@ -44,7 +129,7 @@ go build -o configgen
   --quiet \
   --email "your.email@example.com" \
   --password "your_password" \
-  --assistant "assistant_id" \
+  --assistant "asst_dRvlfW2L6NkVyjeyvbU9tKBA" \
   --schema "/path/to/schema.json" \
   --type "router" \
   --context "Configure a Cisco router with 3 VLANs"
@@ -57,7 +142,7 @@ go build -o configgen
   --debug \
   --email "your.email@example.com" \
   --password "your_password" \
-  --assistant "assistant_id" \
+  --assistant "asst_dRvlfW2L6NkVyjeyvbU9tKBA" \
   --schema "/path/to/schema.json" \
   --type "router" \
   --context "Configure a Cisco router with 3 VLANs"
@@ -68,7 +153,7 @@ go build -o configgen
 ### Global Flags
 - `--email`: Your AI.YOU email address
 - `--password`: Your AI.YOU password
-- `--assistant`: The ID of the AI.YOU assistant to use
+- `--assistant`: The ID of the AI.YOU assistant to use (default: asst_dRvlfW2L6NkVyjeyvbU9tKBA)
 - `--config`: Path to configuration file (optional)
 - `--debug`: Enable debug mode
 - `--quiet`: Disable status messages
@@ -92,31 +177,12 @@ router_config_20240122_153045.yaml
 
 ## Schema Validation
 
-ConfigGen uses a JSON schema to validate and structure the generated configurations. The schema should define:
+ConfigGen uses the official InfraHub JSON schema (https://schema.infrahub.app/infrahub/schema/latest.json) to validate and structure the generated configurations. The schema defines:
 
 - Required fields and their types
 - Allowed values and constraints
 - Nested structures and relationships
 - Validation rules
-
-Example schema reference:
-```json
-{
-    "type": "object",
-    "required": ["version"],
-    "properties": {
-        "version": {
-            "type": "string"
-        },
-        "nodes": {
-            "type": "array",
-            "items": {
-                "$ref": "#/$defs/NodeSchema"
-            }
-        }
-    }
-}
-```
 
 ## Dependencies
 
@@ -151,12 +217,6 @@ The tool includes comprehensive error handling for:
 ## License
 
 This project is licensed under the GPL-3.0 License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- AI.YOU by Cloud Temple for providing the AI capabilities
-- The Go community for excellent tooling
-- Contributors to the project
 
 ## Support
 

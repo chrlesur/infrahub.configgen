@@ -1,0 +1,20 @@
+# Binaries
+configgen
+*.exe
+
+# Generated configs
+*_config.yaml
+
+# IDE
+.idea/
+.vscode/
+
+# Dependencies
+/vendor/
+
+# Test files
+*.test
+
+# OS files
+.DS_Store
+Thumbs.db
